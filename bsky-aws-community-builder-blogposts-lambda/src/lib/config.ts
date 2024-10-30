@@ -8,7 +8,7 @@ const envSchema = z.object({
     service: z.string().nonempty().default("https://bsky.social"),
 });
 
-const parsed = envSchema.parse(JSON.parse(await getSecret('bsky_awscmblogposts_secrets') ?? '{}'));
+const parsed = envSchema.parse(JSON.parse(await getSecret('bsky_awscmblogposts_secrets') ?? ''));
 
 export const bskyAccount: AtpAgentLoginOpts = {
     identifier: parsed.handle,

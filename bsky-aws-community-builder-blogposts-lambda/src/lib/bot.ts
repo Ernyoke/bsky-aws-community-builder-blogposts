@@ -38,21 +38,50 @@ export default class Bot {
         const text = 'New post was published by';
         const textWithName = `${text} ${article.author.name}`;
 
+        let offset = text.length + 1;
+
+        const textFaces = [{
+            index: {
+                byteStart: offset,
+                byteEnd: offset + article.author.name.length
+            },
+            features: [{
+                $type: 'app.bsky.richtext.facet#link',
+                uri: `https://dev.to/${article.author.userName}`
+            }]
+        }];
+
+        offset = offset + 1 + article.author.name.length + '\n'.length;
+
+        const tagsFacets = [];
+        let textLineWithTags = '';
+        for (const tag of article.tags) {
+            const hashTag = `#${tag}`;
+            tagsFacets.push(
+                {
+                    index: {
+                        byteStart: offset,
+                        byteEnd: offset + hashTag.length
+                    },
+                    features: [{
+                        $type: 'app.bsky.richtext.facet#tag',
+                        tag: tag
+                    }]
+                }
+            );
+            offset += (hashTag.length + 1); // for colon and space after tag
+            textLineWithTags += `${hashTag} `;
+        };
+
+        const fullText = `${textWithName}\n${textLineWithTags}`;
+
         const record = {
             '$type': 'app.bsky.feed.post',
             createdAt: article.publishedDate,
-            text: textWithName,
+            text: fullText,
             facets: [
-                {
-                    index: {
-                        byteStart: text.length,
-                        byteEnd: text.length + 1 + article.author.name.length
-                    },
-                    features: [{
-                        $type: 'app.bsky.richtext.facet#link',
-                        uri: `https://dev.to/${article.author.userName}`
-                    }]
-                }
+                ...textFaces, 
+                ...tagsFacets
             ],
             embed: {
                 "$type": 'app.bsky.embed.external',
