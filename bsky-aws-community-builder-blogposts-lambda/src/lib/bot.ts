@@ -51,7 +51,7 @@ export default class Bot {
             }]
         }];
 
-        offset = offset + 1 + article.author.name.length + '\n'.length;
+        offset += (article.author.name.length + '\n'.length);
 
         const tagsFacets = [];
         let textLineWithTags = '';
