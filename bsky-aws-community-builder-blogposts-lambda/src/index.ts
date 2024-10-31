@@ -47,7 +47,7 @@ async function main() {
 
     for (const article of articlesToPost) {
         try {
-            await Bot.run(article, { dryRun: false });
+            await Bot.run(article);
             logger.info(`Posted article ${article.id} with title "${article.title}"`);
         } catch (ex) {
             logger.error(`Failed to post article ${article.id} with title "${article.title} `, {

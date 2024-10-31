@@ -1,18 +1,26 @@
 import { z } from "zod";
+import { env } from "node:process";
 import type { AtpAgentLoginOpts } from "@atproto/api";
 import { getSecret } from '@aws-lambda-powertools/parameters/secrets';
 
-const envSchema = z.object({
-    handle: z.string().nonempty(),
-    password: z.string().nonempty(),
-    service: z.string().nonempty().default("https://bsky.social"),
+const secretsSchema = z.object({
+    handle: z.string().min(1),
+    password: z.string().min(1),
+    service: z.string().min(1).default("https://bsky.social"),
 });
 
-const parsed = envSchema.parse(JSON.parse(await getSecret('bsky_awscmblogposts_secrets') ?? ''));
+const secrets = secretsSchema.parse(JSON.parse(await getSecret('bsky_awscmblogposts_secrets') ?? ''));
 
 export const bskyAccount: AtpAgentLoginOpts = {
-    identifier: parsed.handle,
-    password: parsed.password,
+    identifier: secrets.handle,
+    password: secrets.password,
 };
 
-export const bskyService = parsed.service;
+const envSchema = z.object({
+    BSKY_DRY_RUN: z.boolean().default(true)
+});
+
+const envVars = envSchema.parse(env);
+
+export const bskyService = secrets.service;
+export const bskyDryRun = envVars.BSKY_DRY_RUN

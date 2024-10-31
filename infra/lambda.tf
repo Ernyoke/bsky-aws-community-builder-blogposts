@@ -12,8 +12,14 @@ resource "aws_lambda_function" "lambda" {
   runtime          = "nodejs20.x"
   filename         = local.zip_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  timeout          = 60
+  timeout          = 60 * 5 // 5 minutes
   architectures    = ["arm64"]
+
+  environment {
+    variables = {
+      DRY_RUN = var.dry_run
+    }
+  }
 }
 
 data "archive_file" "lambda_zip" {

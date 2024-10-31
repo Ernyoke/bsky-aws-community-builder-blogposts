@@ -1,4 +1,4 @@
-import { bskyAccount, bskyService } from "./config.js";
+import { bskyAccount, bskyService, bskyDryRun } from "./config.js";
 import type {
     AtpAgentLoginOpts,
     AtpAgentOpts,
@@ -18,7 +18,7 @@ export default class Bot {
 
     static defaultOptions: BotOptions = {
         service: bskyService,
-        dryRun: false,
+        dryRun: bskyDryRun,
     } as const;
 
     constructor(service: AtpAgentOpts["service"]) {
