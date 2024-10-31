@@ -1,14 +1,15 @@
-import { BatchWriteItemCommand, DynamoDBClient, PutRequest, QueryCommand, QueryCommandInput, WriteRequest } from "@aws-sdk/client-dynamodb";
+import { BatchWriteItemCommand, DynamoDBClient, PutRequest, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 import { Article } from "./article.js";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import _ from "lodash";
+import { Logger } from "@aws-lambda-powertools/logger";
 
 const tableName = "bsky-aws-community-builder-blogposts";
 
 export default class DynamoClient {
     private client: DynamoDBClient;
 
-    constructor() {
+    constructor(private logger: Logger) {
         this.client = new DynamoDBClient({});
     }
 
@@ -39,7 +40,10 @@ export default class DynamoClient {
 
         for (let i = 0; i < results.length; i++) {
             if (results[i].status === "rejected") {
-                console.error(`Failed to save batch: ${JSON.stringify(chunks[i])}`);
+                this.logger.error('Failed to save batch!', {
+                    error: results[i],
+                    batch: chunks[i]
+                });
             }
         }
     }
@@ -61,10 +65,10 @@ export default class DynamoClient {
                 } as PutRequest
             };
         });
-    
+
         const command = new BatchWriteItemCommand({
             "RequestItems": {
-                "bsky-aws-community-builder-blogposts": putRequests
+                [`${tableName}`]: putRequests
             }
         });
     

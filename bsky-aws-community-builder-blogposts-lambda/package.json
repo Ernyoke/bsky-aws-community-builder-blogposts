@@ -40,11 +40,12 @@
   },
   "dependencies": {
     "@atproto/api": "^0.2.11",
+    "@aws-lambda-powertools/logger": "^2.10.0",
     "@aws-lambda-powertools/parameters": "^2.10.0",
     "@aws-sdk/client-dynamodb": "^3.679.0",
     "@aws-sdk/client-secrets-manager": "^3.679.0",
     "@aws-sdk/util-dynamodb": "^3.682.0",
-    "zod": "^3.21.4",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "zod": "^3.21.4"
   }
 }
