@@ -17,7 +17,7 @@ resource "aws_lambda_function" "lambda" {
 
   environment {
     variables = {
-      DRY_RUN = var.dry_run
+      BSKY_DRY_RUN = var.dry_run
     }
   }
 }

@@ -17,7 +17,7 @@ export const bskyAccount: AtpAgentLoginOpts = {
 };
 
 const envSchema = z.object({
-    BSKY_DRY_RUN: z.boolean().default(true)
+    BSKY_DRY_RUN: z.enum(['true', 'false']).transform((value) => value === 'true')
 });
 
 const envVars = envSchema.parse(env);
