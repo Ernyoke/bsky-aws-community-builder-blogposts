@@ -7,29 +7,35 @@ import type {
 import atproto from "@atproto/api";
 import { Article } from "./article.js";
 const { BskyAgent } = atproto;
+import { Logger } from "@aws-lambda-powertools/logger";
 
 type BotOptions = {
     service: string | URL;
     dryRun: boolean;
 };
 
+const defaultOptions: BotOptions = {
+    service: bskyService,
+    dryRun: bskyDryRun,
+}
+
 export default class Bot {
     #agent;
 
-    static defaultOptions: BotOptions = {
-        service: bskyService,
-        dryRun: bskyDryRun,
-    } as const;
-
-    constructor(service: AtpAgentOpts["service"]) {
+    constructor(private logger: Logger, options: BotOptions = defaultOptions) {
+        const { service } = options;
         this.#agent = new BskyAgent({ service });
     }
 
-    login(loginOpts: AtpAgentLoginOpts) {
+    login(loginOpts: AtpAgentLoginOpts = bskyAccount) {
         return this.#agent.login(loginOpts);
     }
 
-    async post(article: Article) {
+    async post(article: Article, dryRun: boolean = defaultOptions.dryRun) {
+        if (dryRun) {
+            this.logger.info(`Article with title ${article.title} not posted! Reason: dry run.`)
+        }
+
         const coverImage = await fetch(article.cover);
         const blob = await coverImage.blob();
         const arrayBuffer = await blob.arrayBuffer();
@@ -95,24 +101,5 @@ export default class Bot {
         } as AppBskyFeedPost.Record;
 
         return await this.#agent.post(record);
-    }
-
-    static async run(
-        article: Article,
-        botOptions?: Partial<BotOptions>
-    ) {
-        const { service, dryRun } = botOptions
-            ? Object.assign({}, this.defaultOptions, botOptions)
-            : this.defaultOptions;
-        const bot = new Bot(service);
-        await bot.login(bskyAccount);
-        if (!dryRun) {
-            await bot.post(article);
-        }
-    }
-
-    async uploadBlob(blob: any) {
-        const { data } = await this.#agent.uploadBlob(blob)
-        return data;
     }
 }

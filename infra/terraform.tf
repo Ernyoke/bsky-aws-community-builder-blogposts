@@ -15,4 +15,10 @@ terraform {
 
 provider "aws" {
   region = var.region
+
+  default_tags {
+    tags = { "project" : "bsky-aws-community-builder-blogposts"
+      "managedBy" : "Terraform"
+    }
+  }
 }

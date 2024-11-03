@@ -12,6 +12,7 @@ This project contains the source code for [AWS Community Builder Blog Posts](htt
 - Terraform latest version (tested with 1.9.8)
 - An AWS account
 - A BlueSky account
+    - Create a password for your account: [https://bsky.app/settings/app-passwords](https://bsky.app/settings/app-passwords)
 
 ### Deployment Steps
 

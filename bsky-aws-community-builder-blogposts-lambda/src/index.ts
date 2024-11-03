@@ -45,19 +45,25 @@ async function main() {
         }
     }
 
-    for (const article of articlesToPost) {
-        try {
-            await Bot.run(article);
-            logger.info(`Posted article ${article.id} with title "${article.title}"`);
-        } catch (ex) {
-            logger.error(`Failed to post article ${article.id} with title "${article.title} `, {
-                error: ex
-            });
+    if (articlesToPost.length > 0) {
+        const bot = new Bot(logger);
+        await bot.login();
+        for (const article of articlesToPost) {
+            try {
+                await bot.post(article);
+                logger.info(`Posted article ${article.id} with title "${article.title}"`);
+            } catch (ex) {
+                logger.error(`Failed to post article ${article.id} with title "${article.title} `, {
+                    error: ex
+                });
+            }
         }
+    
+        db.saveArticles(articlesToPost);
+        logger.info(`${articlesToPost.length} articles were saved into DynamoDB.`);
+    } else {
+        logger.info(`No new articles.`);
     }
-
-    db.saveArticles(articlesToPost);
-    logger.info(`${articlesToPost.length} articles were saved into DynamoDB.`);
 }
 
 export const handler: Handler = async (event, context) => {
