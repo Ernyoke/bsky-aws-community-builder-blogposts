@@ -33,7 +33,8 @@ export default class Bot {
 
     async post(article: Article, dryRun: boolean = defaultOptions.dryRun) {
         if (dryRun) {
-            this.logger.info(`Article with title ${article.title} not posted! Reason: dry run.`)
+            this.logger.info(`Article with title ${article.title} not posted! Reason: dry run.`);
+            return;
         }
 
         const coverImage = await fetch(article.cover);
