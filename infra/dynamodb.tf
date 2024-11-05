@@ -1,5 +1,5 @@
 locals {
-  table_name = "bsky-aws-community-builder-blogposts"
+  table_name = var.project_name
 }
 
 resource "aws_dynamodb_table" "table" {

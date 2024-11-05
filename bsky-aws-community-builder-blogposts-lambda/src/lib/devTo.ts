@@ -1,4 +1,4 @@
-import { Article, Author } from "./article.js";
+import {Article, Author} from "./article.js";
 
 interface DevToArticle {
     type_of: string;

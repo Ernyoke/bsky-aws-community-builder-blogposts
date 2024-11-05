@@ -1,10 +1,10 @@
-import { Handler } from 'aws-lambda';
+import {Handler} from 'aws-lambda';
 import Bot from "./lib/bot.js";
 import fetchDevToPostsByOrg from './lib/devTo.js';
 import DynamoClient from './lib/dynamoDB.js';
 import _ from 'lodash';
-import { Article } from './lib/article.js';
-import { Logger } from '@aws-lambda-powertools/logger';
+import {Article} from './lib/article.js';
+import {Logger} from '@aws-lambda-powertools/logger';
 
 const logger = new Logger();
 const db = new DynamoClient(logger);
@@ -37,6 +37,10 @@ async function main() {
             }
         }
 
+        for (const failure of checkFailures) {
+            logger.warn(`Failed to detect if article ${failure.article.id} with title ${failure.article.title} exists in the database!`);
+        }
+
         Array.prototype.push.apply(articlesToPost, recentlyPublished);
 
         if (_.isEmpty(articlesToPost)) {
@@ -58,8 +62,8 @@ async function main() {
                 });
             }
         }
-    
-        db.saveArticles(articlesToPost);
+
+        await db.saveArticles(articlesToPost);
         logger.info(`${articlesToPost.length} articles were saved into DynamoDB.`);
     } else {
         logger.info(`No new articles.`);

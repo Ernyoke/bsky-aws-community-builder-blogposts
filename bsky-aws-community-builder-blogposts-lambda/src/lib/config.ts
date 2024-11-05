@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { env } from "node:process";
-import type { AtpAgentLoginOpts } from "@atproto/api";
-import { getSecret } from '@aws-lambda-powertools/parameters/secrets';
+import {z} from "zod";
+import {env} from "node:process";
+import type {AtpAgentLoginOpts} from "@atproto/api";
+import {getSecret} from '@aws-lambda-powertools/parameters/secrets';
 
 const secretsSchema = z.object({
     handle: z.string().min(1),
@@ -17,10 +17,14 @@ export const bskyAccount: AtpAgentLoginOpts = {
 };
 
 const envSchema = z.object({
-    BSKY_DRY_RUN: z.enum(['true', 'false']).transform((value) => value === 'true')
+    BSKY_DRY_RUN: z.enum(['true', 'false']).transform((value) => value === 'true'),
+    TABLE_NAME: z.string().min(1)
 });
 
 const envVars = envSchema.parse(env);
 
-export const bskyService = secrets.service;
-export const bskyDryRun = envVars.BSKY_DRY_RUN
+export const config = {
+    bskyService: secrets.service,
+    bskyDryRun: envVars.BSKY_DRY_RUN,
+    tableName:  envVars.TABLE_NAME
+};

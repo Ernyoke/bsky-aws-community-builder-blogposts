@@ -1,13 +1,10 @@
-import { bskyAccount, bskyService, bskyDryRun } from "./config.js";
-import type {
-    AtpAgentLoginOpts,
-    AtpAgentOpts,
-    AppBskyFeedPost,
-} from "@atproto/api";
+import {bskyAccount, config} from "./config.js";
+import type {AppBskyFeedPost, AtpAgentLoginOpts,} from "@atproto/api";
 import atproto from "@atproto/api";
-import { Article } from "./article.js";
-const { BskyAgent } = atproto;
-import { Logger } from "@aws-lambda-powertools/logger";
+import {Article} from "./article.js";
+import {Logger} from "@aws-lambda-powertools/logger";
+
+const {BskyAgent} = atproto;
 
 type BotOptions = {
     service: string | URL;
@@ -15,16 +12,16 @@ type BotOptions = {
 };
 
 const defaultOptions: BotOptions = {
-    service: bskyService,
-    dryRun: bskyDryRun,
+    service: config.bskyService,
+    dryRun: config.bskyDryRun,
 }
 
 export default class Bot {
     #agent;
 
     constructor(private logger: Logger, options: BotOptions = defaultOptions) {
-        const { service } = options;
-        this.#agent = new BskyAgent({ service });
+        const {service} = options;
+        this.#agent = new BskyAgent({service});
     }
 
     login(loginOpts: AtpAgentLoginOpts = bskyAccount) {
@@ -37,20 +34,23 @@ export default class Bot {
             return;
         }
 
+        const encoder = new TextEncoder();
+
         const coverImage = await fetch(article.cover);
         const blob = await coverImage.blob();
         const arrayBuffer = await blob.arrayBuffer();
-        const { data } = await this.#agent.uploadBlob(new Uint8Array(arrayBuffer), { encoding: blob.type });
+        const {data} = await this.#agent.uploadBlob(new Uint8Array(arrayBuffer), {encoding: blob.type});
 
         const text = 'New post was published by';
         const textWithName = `${text} ${article.author.name}`;
 
         let offset = text.length + 1;
+        const authorNameLength = encoder.encode(article.author.name).byteLength;
 
         const textFaces = [{
             index: {
                 byteStart: offset,
-                byteEnd: offset + article.author.name.length
+                byteEnd: offset + authorNameLength
             },
             features: [{
                 $type: 'app.bsky.richtext.facet#link',
@@ -58,17 +58,19 @@ export default class Bot {
             }]
         }];
 
-        offset += (article.author.name.length + '\n'.length);
+        offset += (authorNameLength + '\n'.length);
 
         const tagsFacets = [];
+        const hashTags: string[] = [];
         let textLineWithTags = '';
         for (const tag of article.tags) {
             const hashTag = `#${tag}`;
+            const hashTagLength = encoder.encode(hashTag).byteLength;
             tagsFacets.push(
                 {
                     index: {
                         byteStart: offset,
-                        byteEnd: offset + hashTag.length
+                        byteEnd: offset + hashTagLength
                     },
                     features: [{
                         $type: 'app.bsky.richtext.facet#tag',
@@ -76,9 +78,10 @@ export default class Bot {
                     }]
                 }
             );
-            offset += (hashTag.length + 1); // for colon and space after tag
-            textLineWithTags += `${hashTag} `;
-        };
+            offset += (hashTagLength + 1);
+            hashTags.push(hashTag);
+        }
+        textLineWithTags += `${hashTags.join(' ')}`;
 
         const fullText = `${textWithName}\n${textLineWithTags}`;
 
@@ -87,7 +90,7 @@ export default class Bot {
             createdAt: article.publishedDate,
             text: fullText,
             facets: [
-                ...textFaces, 
+                ...textFaces,
                 ...tagsFacets
             ],
             embed: {

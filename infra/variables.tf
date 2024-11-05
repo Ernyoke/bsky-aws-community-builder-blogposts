@@ -1,3 +1,7 @@
+variable "project_name" {
+  default = "bsky-aws-community-builder-blogposts"
+}
+
 variable "region" {
   type    = string
   default = "us-east-1"

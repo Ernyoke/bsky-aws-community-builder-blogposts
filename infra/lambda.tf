@@ -1,5 +1,5 @@
 locals {
-  function_name = "bsky-aws-community-builder-blogposts-lambda"
+  function_name = "${var.project_name}-lambda"
   zip_path      = "${path.module}/temp/${local.function_name}.zip"
 }
 
@@ -18,6 +18,7 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = {
       BSKY_DRY_RUN = var.dry_run
+      TABLE_NAME = aws_dynamodb_table.table.name
     }
   }
 }
