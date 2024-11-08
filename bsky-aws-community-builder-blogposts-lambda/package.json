@@ -2,7 +2,7 @@
   "name": "bsky-bot",
   "version": "1.0.0",
   "description": "A template repo for building Bluesky bots",
-  "main": "dist/index.js",
+  "main": "dist/local.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

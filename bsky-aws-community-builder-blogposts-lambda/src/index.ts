@@ -74,5 +74,3 @@ export const handler: Handler = async (event, context) => {
     logger.addContext(context);
     return await main();
 };
-
-// await main();

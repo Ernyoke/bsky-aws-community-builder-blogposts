@@ -33,6 +33,7 @@ resource "aws_cloudwatch_event_rule" "every_five_minutes" {
   name                = "${local.function_name}-every-5-min"
   description         = "Run ${local.function_name} every five minutes"
   schedule_expression = "rate(5 minutes)"
+  state               = "ENABLED"
 }
 
 resource "aws_cloudwatch_event_target" "target" {

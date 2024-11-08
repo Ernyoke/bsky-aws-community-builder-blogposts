@@ -41,10 +41,10 @@ export default class Bot {
         const arrayBuffer = await blob.arrayBuffer();
         const {data} = await this.#agent.uploadBlob(new Uint8Array(arrayBuffer), {encoding: blob.type});
 
-        const text = 'New post was published by';
-        const textWithName = `${text} ${article.author.name}`;
+        const introText = '✍️ New blog post by ';
+        const introWithAuthor = `${introText}${article.author.name}\n\n`;
 
-        let offset = text.length + 1;
+        let offset = encoder.encode(introText).byteLength;
         const authorNameLength = encoder.encode(article.author.name).byteLength;
 
         const textFaces = [{
@@ -58,7 +58,10 @@ export default class Bot {
             }]
         }];
 
-        offset += (authorNameLength + '\n'.length);
+        offset += (authorNameLength + encoder.encode('\n\n').byteLength);
+
+        const titleRow = `${article.title}\n\n`;
+        offset += encoder.encode(titleRow).byteLength;
 
         const tagsFacets = [];
         const hashTags: string[] = [];
@@ -83,7 +86,7 @@ export default class Bot {
         }
         textLineWithTags += `${hashTags.join(' ')}`;
 
-        const fullText = `${textWithName}\n${textLineWithTags}`;
+        const fullText = `${introWithAuthor}${titleRow}${textLineWithTags}`;
 
         const record = {
             '$type': 'app.bsky.feed.post',
